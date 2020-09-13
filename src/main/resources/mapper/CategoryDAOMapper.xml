@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyt.dao.CategoryDao">
+	
+	<resultMap type="Category" id="cateMap">
+		<id column="id1" property="id"/>
+		<result column="cateName1" property="cateName"/>
+		<result column="parentCateName1" property="parentCateName"/>
+		<result column="grade1" property="grade"/>
+			<collection property="categories" ofType="Category">
+				<id column="id2" property="id"/>
+				<result column="cateName2" property="cateName"/>
+				<result column="parentCateName2" property="parentCateName"/>
+				<result column="grade2" property="grade"/>
+				<collection property="books" ofType="com.wyt.entity.Book">
+					<id column="id" property="id"/>
+					<result column="bookName" property="bookName"/>
+					<result column="price" property="price"/>
+					<result column="ddPrice" property="ddPrice"/>
+					<result column="image" property="image"/>
+					<result column="press" property="press"/>
+					<result column="publishDate" property="publishDate"/>
+					<result column="parentCateName" property="parentCateName"/>
+					<result column="storages" property="storages"/>
+					<result column="writer" property="writer"/>
+					<result column="saleCount" property="saleCount"/>
+				</collection>
+			</collection>
+	</resultMap>
+	<!-- 查询所有 -->
+	<select id="queryAll" resultMap="cateMap">
+		select 
+			dc1.id as "id1",
+			dc1.cateName as "cateName1",
+			dc1.parentCateName as "parentCateName1",
+			dc1.grade as "grade1",
+			dc2.id as "id2",
+			dc2.cateName as "cateName2",
+			dc2.parentCateName as "parentCateName2",
+			dc2.grade as "grade2",
+			db.*
+		from dd_Category dc1 left join dd_Category dc2 on dc1.catename=dc2.parentcatename 
+				left join dd_book db on db.parentcatename=dc2.catename
+	</select>
+	
+	<!-- 根据类别名查询 -->
+	<select id="queryByName" resultType="Category">
+		select 
+			id,cateName,parentCateName,grade
+			from dd_Category where cateName=#{1} 
+	</select>
+	
+	<!-- 添加一级类别 -->
+	<insert id="insertFirstGrade">
+		insert into dd_Category values(#{id},#{cateName},#{parentCateName,jdbcType=VARCHAR},#{grade})
+	</insert>
+	
+	<!-- 查询所有一级类别 -->
+	<select id="queryAllGradeOne" resultType="Category">
+		select
+		 	id,cateName,parentCateName,grade 
+		from dd_Category where grade=#{1}
+	</select>
+	
+	<!-- 添加二级类别 -->
+	<insert id="insertSecondGrade">
+		insert into dd_Category values(#{id,jdbcType=VARCHAR},#{cateName,jdbcType=VARCHAR},#{parentCateName,jdbcType=VARCHAR},#{grade,jdbcType=INTEGER})
+	</insert>
+	
+	<!-- 根据二级类别名查询 -->
+	<select id="queryBySecondName" resultType="Category">
+		select 
+			id,cateName,parentCateName,grade
+		from dd_Category where cateName=#{name} and grade=#{i}
+	</select>
+	
+	<!-- 删除一条数据 -->
+	<delete id="deleteOne">
+		delete from dd_Category where id=#{1}
+	</delete>
+	
+	<!-- 查询所有二级类别 -->
+	<select id="queryAllGradeTwo" resultType="Category">
+		select 
+			id,cateName,parentCateName,grade
+		from dd_Category where grade=2
+	</select>
+	
+	<!-- 前台：查询所属类别一样的二级类别 -->
+	<select id="queryGradeTwoBelongToOne" resultType="Category">
+		select
+			id,cateName,parentCateName,grade
+		from dd_Category where parentCateName=#{1}
+	</select>
+	
+	<select id="queryByGrade1" resultMap="cateMap">
+		<!-- 分页查询一级类别下的图书 -->
+		<if test="startIndex!=0">
+		select * from(
+		select a.*,rownum rn
+			from(select
+					dc1.id as "id1",
+					dc1.cateName as "cateName1",
+					dc1.parentCateName as "parentCateName1",
+					dc1.grade as "grade1",
+					dc2.id as "id2",
+					dc2.cateName as "cateName2",
+					dc2.parentCateName as "parentCateName2",
+					dc2.grade as "grade2",
+					id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer
+				from dd_Category dc1 left join dd_Category dc2 on dc1.catename=dc2.parentcatename 
+											left join dd_book db on dc2.catename=db.parentcatename 
+				 where dc1.cateName=#{yiji}) a)
+			where rn between #{startIndex} and #{endIndex}
+		</if>
+		<!-- 查询一级类别下的所有图书 -->
+		<if test="startIndex==0">
+			select
+					dc1.id as "id1",
+					dc1.cateName as "cateName1",
+					dc1.parentCateName as "parentCateName1",
+					dc1.grade as "grade1",
+					dc2.id as "id2",
+					dc2.cateName as "cateName2",
+					dc2.parentCateName as "parentCateName2",
+					dc2.grade as "grade2",
+					id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer
+				from dd_Category dc1 left join dd_Category dc2 on dc1.catename=dc2.parentcatename 
+											left join dd_book db on dc2.catename=db.parentcatename 
+				 where dc1.cateName=#{yiji}
+		</if>
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

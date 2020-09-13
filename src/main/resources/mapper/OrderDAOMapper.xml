@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyt.dao.OrderDao">
+  
+
+	
+	<update id="updateBook">
+		update dd_book 
+		<set>
+			<if test="storages!=0">
+				storages=#{storages},
+			</if>
+			<if test="storages==0">
+				saleCount=#{saleCount}
+			</if>
+		</set>
+		 where id=#{id}
+	</update>
+  
+  	<insert id="addBookOrderOrOrderItem">
+  		<if test="order!=null">
+  			insert into dd_order values(#{order.id},#{order.orderNumber},#{order.orderTime},#{order.total},#{order.status},#{order.addressee},#{order.address},#{order.userId},#{order.addressId})
+  		</if>
+  		<if test="order==null">
+  			insert into dd_orderItem values(#{oi.id},#{oi.price},#{oi.count},#{oi.miniPrice},#{oi.bookId},#{oi.orderId})
+  		</if>
+  	</insert>
+  
+</mapper>

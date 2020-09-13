@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyt.dao.UserDao">
+
+	<resultMap type="Address" id="addrMap">
+		<id column="id2" property="id"/>
+			<result column="addressee" property="addressee"/>
+			<result column="address" property="address"/>
+			<result column="postcode" property="postcode"/>
+			<result column="phone" property="phone"/>
+			<result column="userId" property="userId"/>
+			<result column="defaultAddr" property="defaultAddr"/>
+			<collection property="user" ofType="User">
+				<id column="id" property="id"/>
+				<result column="petName" property="petName"/>
+				<result column="email" property="email"/>
+				<result column="password" property="password"/>
+				<result column="actiCode" property="actiCode"/>
+				<result column="salt" property="salt"/>
+				<result column="status" property="status"/>
+			</collection>
+	</resultMap>
+
+
+	<insert id="addUser">
+		insert into dd_user values(#{id},#{petName},#{email},#{password},#{actiCode},#{salt},#{status})
+	</insert>
+
+	<select id="queryByEmail" resultType="User">
+		select 
+			id,petName,email,password,actiCode,salt,status
+		from dd_user where email=#{1}
+	</select>
+
+	<select id="queryAddressByUserId" resultMap="addrMap">
+		select  
+			du.id,petName,email,password,actiCode,salt,status,
+			da.id as id2,address,addressee,postcode,phone,userid,defaultAddr
+		from dd_user du left join dd_address da on du.id=da.userId where userId=#{1}
+	</select>
+
+	<update id="updateUser">
+		update dd_user 
+		<set>
+		<if test="pass==null">
+			email=#{user.email},petName=#{user.petName}
+		</if>
+		<if test="pass!=null">
+			email=#{user.email},petName=#{user.petName},password=#{pass}
+		</if>
+		where id=#{user.id}
+		</set>
+	</update>
+	
+	<select id="queryById" resultType="User">
+		select 
+			id,petName,email,password,actiCode,salt,status
+		from dd_user where id=#{1}
+	</select>
+
+
+</mapper>

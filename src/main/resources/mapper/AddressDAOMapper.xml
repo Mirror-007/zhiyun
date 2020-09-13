@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyt.dao.AddressDao">
+  
+  
+  <select id="queryByCondition" resultType="Address">
+  	
+  	select 
+  		id,addressee,address,postcode,phone,defaultAddr,userId
+  	from dd_address 
+  	<where> 
+  		<if test="addressee!=null">
+  			addressee=#{addressee} and address=#{address} and userId=#{userId}
+  		</if>
+  		<if test="addressee==null">
+  			userId=#{userId}
+  		</if>
+  	</where>
+  	
+  </select>
+  
+  <insert id="insertOneAddress">
+  	insert into dd_address values(#{id},#{addressee},#{address},#{postcode},#{phone},#{userId},#{defaultAddr,jdbcType=VARCHAR})
+  </insert>
+  
+  <delete id="deleteAddr">
+  	delete from dd_address where id=#{1}
+  </delete>
+  
+  <update id="update">
+  	update dd_address set defaultAddr=#{1} where defaultAddr=1
+  </update>
+  
+  <update id="updateDefault">
+  	update dd_address set defaultAddr=#{i} where id=#{id}
+  </update>
+  
+  <select id="queryBydefault" resultType="Address">
+  	select
+  		id,addressee,address,postcode,phone,defaultAddr,userId
+  	from dd_address where defaultAddr=#{1}
+  </select>
+  
+  
+  
+  
+  
+  
+  
+</mapper>

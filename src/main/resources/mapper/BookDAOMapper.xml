@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyt.dao.BookDao">
+	
+	<!-- 查询所有图书 -->
+	<select id="queryBooks" resultType="Book">
+		select * from dd_book
+	</select>
+	
+	<!-- 添加图书 -->
+	<insert id="addBook">
+		insert into dd_book(id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer)
+		       values(#{id},#{bookName},#{price},#{ddPrice},#{image},#{press},#{publishDate},#{parentCateName},#{storages},#{writer})
+	</insert>
+	
+	<!-- 根据id查询图书 -->
+	<select id="queryById" resultType="Book">
+		select 
+			id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer,saleCount
+		from dd_book where id=#{1,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 更新数据 -->
+	<update id="update">
+		update dd_book set bookName=#{bo.bookName} , price=#{bo.price} , ddPrice=#{bo.ddPrice} , image=#{bo.image} ,
+			press=#{bo.press} , publishDate=#{bo.publishDate} , 
+			parentCateName=#{bo.parentCateName} , storages=#{bo.storages} , writer=#{bo.writer}
+		where id=#{idd} 
+	</update>
+	
+	<!-- 根据图书名字查询 -->
+	<select id="queryByBookName" resultType="Book">
+		select 
+			id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer,saleCount
+		from dd_book where bookName=#{1}
+	</select>
+	
+	<!-- 删除图书 -->
+	<delete id="deleteBook">
+		delete from dd_book where id=#{1}
+	</delete>
+	
+	<!-- 根据条件模糊查询 -->
+	<select id="likeQueryByKey" resultType="Book">
+		select
+			id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer,saleCount
+		from dd_book
+		<where>
+			<if test="bookName!=null">
+				bookName like '%'||#{bookName}||'%'
+			</if>
+			<if test="writer!=null">
+				writer like '%'||#{writer}||'%'
+			</if>
+			<if test="press!=null">
+				press like '%'||#{press}||'%'
+			</if>
+		</where>
+	</select>
+	<!-- 通过二级名字查询下属所有图书 -->
+	<select id="queryByGrade2" resultType="Book">
+		<!-- 分页 -->
+		<if test="startIndex!=0">
+		select * from
+		(select a.*,rownum rn from
+		(select
+			id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer,saleCount
+		from dd_book where parentCateName=#{grade2}) a) where rn between #{startIndex} and #{endIndex}
+		</if>
+		
+		<!-- 查询二级下的所有图书 -->
+		<if test="startIndex==0">
+		select
+			id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer,saleCount
+		from dd_book where parentCateName=#{grade2}
+		</if> 
+	</select>
+	
+	<!-- 随机查询，按销量查询，按上架时间查询 -->
+	<select id="queryFrontCondition" resultType="Book">
+		select 
+			id,bookName,price,ddPrice,image,press,publishDate,parentCateName,storages,writer,saleCount
+		from 
+		<if test="recNum!=0">
+			(select * from dd_book  order by dbms_random.random)where rownum &lt;= #{recNum}
+		</if>
+		
+		<if test="hotsNum!=0">
+		 	(select * from dd_book db where saleCount>0 order by saleCount desc)where rownum &lt;= #{hotsNum}
+		</if>
+		
+		<if test="newsNum!=0">
+			(select db.*,rownum rn from dd_book db order by publishDate desc)where rn &lt;= #{newsNum}
+		</if>
+	</select>
+	
+</mapper>
